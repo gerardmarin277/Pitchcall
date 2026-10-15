@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes.js');
 const teamRoutes = require('./routes/teamRoutes.js');
 const eventRoutes = require('./routes/eventRoutes.js');
+const responseRoutes = require('./routes/responseRoutes.js');
 
 // Conectar a MongoDB Atlas
 connectDB();
@@ -20,6 +21,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/teams', teamRoutes);
 
 app.use('/api/events', eventRoutes);
+
+app.use('/api/responses', responseRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: '¡Bienvenido a la API de PitchCall!' });
