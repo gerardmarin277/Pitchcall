@@ -5,7 +5,7 @@ const eventSchema = new mongoose.Schema({
   type: { type: String, enum: ['training', 'match'], required: true },
   date: { type: Date, required: true },
   location: { type: String, required: true },
-  deadline: { type: Date, required: true },
+  deadline: { type: Date },
   rival: { type: String },
   status: { type: String, enum: ['published', 'closed'], default: 'published' }
 }, { timestamps: true });
