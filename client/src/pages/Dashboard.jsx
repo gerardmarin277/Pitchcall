@@ -22,6 +22,9 @@ const Dashboard = () => {
   const [selectedEventForReason, setSelectedEventForReason] = useState(null);
   const [absenceReason, setAbsenceReason] = useState('');
 
+  const [eventResponses, setEventResponses] = useState({});
+  const [loadingResponses, setLoadingResponses] = useState({});
+
   const [newEvent, setNewEvent] = useState({
     title: '',
     eventType: 'training',
@@ -30,7 +33,7 @@ const Dashboard = () => {
     location: ''
   });
 
-  // Cargar eventos al montar el componente
+  // Cargar eventos y respuestas previas al montar el componente
   useEffect(() => {
     let isMounted = true;
 
@@ -41,7 +44,7 @@ const Dashboard = () => {
         if (!isMounted) return;
         setEvents(res.data);
 
-        if(user?.role === 'player' && res.data.length > 0){
+        if (user?.role === 'player' && res.data.length > 0) {
           const responsesMap = {};
 
           await Promise.all(
@@ -50,17 +53,17 @@ const Dashboard = () => {
                 const resResp = await API.get(`/responses/event/${ev._id}`);
 
                 const myResp = resResp.data.find(
-                  (r) => (r.user._id || r.user) === user.id || (r.user._id || r.user) === user._id
+                  (r) => (r.user?._id || r.user) === user.id || (r.user?._id || r.user) === user._id
                 );
-                if(myResp){
+                if (myResp) {
                   responsesMap[ev._id] = myResp.status;
                 }
-              } catch(e){
+              } catch (e) {
                 console.error(e);
               }
             })
           );
-          if(isMounted){
+          if (isMounted) {
             setMyResponses(responsesMap);
           }
         }
@@ -84,6 +87,24 @@ const Dashboard = () => {
       setEvents(res.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Error al cargar los eventos');
+    }
+  };
+
+  const fetchEventResponses = async (eventId) => {
+    // Si ya está abierto, lo cerramos
+    if (eventResponses[eventId]) {
+      setEventResponses((prev) => ({ ...prev, [eventId]: null }));
+      return;
+    }
+
+    try {
+      setLoadingResponses((prev) => ({ ...prev, [eventId]: true }));
+      const res = await API.get(`/responses/event/${eventId}`);
+      setEventResponses((prev) => ({ ...prev, [eventId]: res.data }));
+    } catch (err) {
+      console.error('Error al cargar respuestas del evento', err);
+    } finally {
+      setLoadingResponses((prev) => ({ ...prev, [eventId]: false }));
     }
   };
 
@@ -114,8 +135,7 @@ const Dashboard = () => {
         status,
         reason: status === 'absent' ? (customReason || absenceReason || undefined) : undefined
       });
-      
-      // Actualizamos el estado local al instante para feedback visual inmediato
+
       setMyResponses((prev) => ({ ...prev, [eventId]: status }));
       setSelectedEventForReason(null);
       setAbsenceReason('');
@@ -129,7 +149,8 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-slate-100 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        
+
+        {/* Encabezado */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200 flex justify-between items-center">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -154,6 +175,7 @@ const Dashboard = () => {
           </div>
         )}
 
+        {/* Formulario para Crear Eventos (Solo Entrenador) */}
         {user.role === 'coach' && (
           <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
             <h2 className="text-xl font-bold text-slate-800 mb-4">📅 Programar Nuevo Evento</h2>
@@ -230,6 +252,7 @@ const Dashboard = () => {
           </div>
         )}
 
+        {/* Lista de Eventos */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
           <h2 className="text-xl font-bold text-slate-800 mb-4">
             {user.role === 'coach' ? '📋 Eventos Programados' : '⚽ Próximas Convocatorias'}
@@ -256,7 +279,9 @@ const Dashboard = () => {
                         >
                           {(ev.type || ev.eventType) === 'match' ? 'PARTIDO' : 'ENTRENAMIENTO'}
                         </span>
-                        <h3 className="font-bold text-slate-900 text-lg">{ev.title || (ev.type === 'match' ? `vs ${ev.rival}` : 'Entrenamiento')}</h3>
+                        <h3 className="font-bold text-slate-900 text-lg">
+                          {ev.title || (ev.type === 'match' ? `vs ${ev.rival}` : 'Entrenamiento')}
+                        </h3>
                       </div>
 
                       <p className="text-sm text-slate-600 mt-1">
@@ -267,6 +292,7 @@ const Dashboard = () => {
                       )}
                     </div>
 
+                    {/* Botones de respuesta para Jugador */}
                     {user.role === 'player' && (
                       <div className="flex items-center gap-2">
                         <button
@@ -300,7 +326,7 @@ const Dashboard = () => {
                     )}
                   </div>
 
-                  {/* Formulario integrado de motivo de ausencia */}
+                  {/* Campo de Motivo de Ausencia (Jugador) */}
                   {user.role === 'player' && selectedEventForReason === ev._id && (
                     <div className="mt-2 pt-3 border-t border-slate-100 flex flex-col sm:flex-row gap-2 items-center">
                       <input
@@ -316,6 +342,68 @@ const Dashboard = () => {
                       >
                         Confirmar Ausencia
                       </button>
+                    </div>
+                  )}
+
+                  {/* Panel de Control de Asistencia (Entrenador) */}
+                  {user.role === 'coach' && (
+                    <div className="mt-2 pt-3 border-t border-slate-100">
+                      <button
+                        onClick={() => fetchEventResponses(ev._id)}
+                        className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        {loadingResponses[ev._id]
+                          ? 'Cargando...'
+                          : eventResponses[ev._id]
+                          ? 'Ocultar Control de Asistencia'
+                          : '📊 Ver Control de Asistencia'}
+                      </button>
+
+                      {eventResponses[ev._id] && (
+                        <div className="mt-3 bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm space-y-3">
+                          <h4 className="font-bold text-slate-700">Estado de la Convocatoria:</h4>
+
+                          {eventResponses[ev._id].length === 0 ? (
+                            <p className="text-slate-500 text-xs italic">
+                              Ningún jugador ha respondido todavía.
+                            </p>
+                          ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {eventResponses[ev._id].map((resp) => (
+                                <div
+                                  key={resp._id}
+                                  className={`p-2 rounded border flex flex-col justify-between ${
+                                    resp.status === 'attending'
+                                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                                      : resp.status === 'absent'
+                                      ? 'bg-red-50 border-red-200 text-red-900'
+                                      : 'bg-amber-50 border-amber-200 text-amber-900'
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-center">
+                                    <span className="font-semibold">
+                                      {resp.user?.name || 'Jugador'}{' '}
+                                      {resp.user?.dorsal ? `(#${resp.user.dorsal})` : ''}
+                                    </span>
+                                    <span className="text-xs font-bold px-2 py-0.5 rounded uppercase">
+                                      {resp.status === 'attending'
+                                        ? 'Asiste'
+                                        : resp.status === 'absent'
+                                        ? 'Ausente'
+                                        : 'Pendiente'}
+                                    </span>
+                                  </div>
+                                  {resp.reason && (
+                                    <p className="text-xs mt-1 text-slate-600 italic">
+                                      Motivo: "{resp.reason}"
+                                    </p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
