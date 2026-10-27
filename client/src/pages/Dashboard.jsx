@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
+import Roster from '../components/Roster';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -174,6 +175,9 @@ const Dashboard = () => {
             {error}
           </div>
         )}
+
+        {/* Sección de Plantilla solo visible para Entrenador */}
+        {user.role === 'coach' && <Roster />}
 
         {/* Formulario para Crear Eventos (Solo Entrenador) */}
         {user.role === 'coach' && (
