@@ -71,19 +71,6 @@ flowchart TD
     G --> H[Attendance tracking]
 ```
 
-## 🖥️ Screenshots
-
-*Application screenshots will be added as development progresses.*
-
-| Coach Dashboard | Training Sessions |
-|:---:|:---:|
-| ![Coach Dashboard](docs/images/dashboard.png) | ![Training Sessions](docs/images/trainings.png) |
-| Overview of player availability and upcoming activities. | Manage sessions and review attendance. |
-
-| Player Attendance | Match Call-ups |
-|:---:|:---:|
-| ![Player Attendance](docs/images/attendance.png) | ![Match Call-ups](docs/images/callups.png) |
-| Confirm availability and report absences. | Organize match selections. |
 
 ## 🛠️ Tech Stack
 
