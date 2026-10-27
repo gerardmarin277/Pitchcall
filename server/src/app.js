@@ -7,9 +7,7 @@ const teamRoutes = require('./routes/teamRoutes.js');
 const eventRoutes = require('./routes/eventRoutes.js');
 const responseRoutes = require('./routes/responseRoutes.js');
 const userRoutes = require('./routes/userRoutes.js');
-
-// Conectar a MongoDB Atlas
-connectDB();
+const { startEventCleanup } = require('./services/eventCleanup.js');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +29,9 @@ app.get('/', (req, res) => {
   res.json({ message: '¡Bienvenido a la API de PitchCall!' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+connectDB().then(() => {
+  startEventCleanup();
+  app.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
+  });
 });
