@@ -4,7 +4,7 @@ import API from '../services/api.js';
 
 
 const Login = () => {
-    const [formData, setFormData] = useState({ email: '', password: ''});
+    const [formData, setFormData] = useState({ username: '', password: ''});
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -46,15 +46,16 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+            <label className="block text-sm font-medium text-gray-700">Usuario</label>
             <input
-              type="email"
-              name="email"
+              type="text"
+              name="username"
               required
-              value={formData.email}
+              autoComplete="username"
+              value={formData.username}
               onChange={handleChange}
               className="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-              placeholder="tu@email.com"
+              placeholder="Lahcen1-2026"
             />
           </div>
 
@@ -64,10 +65,11 @@ const Login = () => {
               type="password"
               name="password"
               required
+              autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
               className="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-              placeholder="••••••••"
+              placeholder="Lahcen1"
             />
           </div>
 

@@ -9,9 +9,7 @@ const Roster = () => {
 
   const [newPlayer, setNewPlayer] = useState({
     name: '',
-    email: '',
-    dorsal: '',
-    password: 'Password123!'
+    dorsal: ''
   });
 
   useEffect(() => {
@@ -32,13 +30,19 @@ const Roster = () => {
   const handleAddPlayer = async (e) => {
     e.preventDefault();
     try {
+      const name = newPlayer.name.trim();
+      const dorsal = Number(newPlayer.dorsal);
+      const credentialBase = `${name}${dorsal}`;
+
       await API.post('/auth/register', {
-        ...newPlayer,
+        name,
+        email: `${credentialBase}-2026`,
+        password: credentialBase,
         role: 'player',
-        dorsal: newPlayer.dorsal ? Number(newPlayer.dorsal) : undefined
+        dorsal
       });
       alert('Jugador registrado e incorporado a la plantilla con éxito');
-      setNewPlayer({ name: '', email: '', dorsal: '', password: 'Password123!' });
+      setNewPlayer({ name: '', dorsal: '' });
       setShowAddForm(false);
       
       // Recargar la lista tras añadir
@@ -85,21 +89,11 @@ const Roster = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-700">Email</label>
-            <input
-              type="email"
-              required
-              placeholder="jugador@equipo.com"
-              value={newPlayer.email}
-              onChange={(e) => setNewPlayer({ ...newPlayer, email: e.target.value })}
-              className="mt-1 w-full text-sm px-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
             <label className="block text-xs font-medium text-slate-700">Dorsal</label>
             <input
               type="number"
+              required
+              min="1"
               placeholder="Ej. 10"
               value={newPlayer.dorsal}
               onChange={(e) => setNewPlayer({ ...newPlayer, dorsal: e.target.value })}

@@ -38,9 +38,14 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { username, email, password } = req.body;
+        const identifier = username || email;
 
-        const user = await User.findOne({ email });
+        if (typeof identifier !== 'string' || typeof password !== 'string') {
+            return res.status(400).json({ message: 'Credenciales inválidas (usuario o contraseña incorrectos).' });
+        }
+
+        const user = await User.findOne({ email: identifier });
 
         if (!user) {
             return res.status(400).json({ message: 'Credenciales inválidas (usuario o contraseña incorrectos).' });
