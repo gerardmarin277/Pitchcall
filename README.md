@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚽ Football Attendance Manager
+# ⚽ Pitchcall
 
 ### Your team. Your schedule. One place.
 
@@ -17,7 +17,7 @@ Una aplicación web para gestionar entrenamientos, controlar la asistencia de lo
 
 ## 📖 About the project
 
-Football Attendance Manager is a web application designed to simplify attendance management for amateur football teams.
+Pitchcall is a web application designed to simplify attendance management for amateur football teams.
 
 Instead of relying on WhatsApp messages, manual lists and endless conversations, coaches can organize training sessions, track player availability and manage match call-ups from one centralized platform.
 
@@ -88,7 +88,7 @@ flowchart TD
 ## 🏗️ Architecture
 
 ```text
-football-attendance-manager/
+pitchcall/
 │
 ├── frontend/          # React application
 │   ├── src/
@@ -129,8 +129,8 @@ football-attendance-manager/
 **1. Clone the repository**
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/football-attendance-manager.git
-cd football-attendance-manager
+git clone https://github.com/YOUR_USERNAME/pitchcall.git
+cd pitchcall
 ```
 
 **2. Install backend dependencies**
